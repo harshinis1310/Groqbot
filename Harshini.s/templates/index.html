@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nova AI — Groq LPU Multimodal Problem Solver & 3D Assistant</title>
+  <meta name="description" content="Next-generation multimodal AI problem solver powered by Groq LPUs, featuring voice synthesis, Whisper transcription, vision reasoning, AI image studio, and an interactive 3D avatar companion.">
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  
+  <!-- Highlight.js for Code Highlighting -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  
+  <!-- Marked.js for Markdown Parsing -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  
+  <!-- Three.js for 3D Holographic Avatar -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body class="dark-theme">
+  <!-- Dynamic Background Glow -->
+  <div class="ambient-glow glow-1"></div>
+  <div class="ambient-glow glow-2"></div>
+  <div class="ambient-grid"></div>
+
+  <!-- App Wrapper -->
+  <div class="app-layout">
+    
+    <!-- Sidebar -->
+    <aside class="app-sidebar" id="appSidebar">
+      <div class="sidebar-header">
+        <div class="brand">
+          <div class="brand-orb">
+            <div class="brand-orb-inner"></div>
+          </div>
+          <div class="brand-text">
+            <h2>Nova<span>AI</span></h2>
+            <span class="engine-tag">Groq LPU High-Speed</span>
+          </div>
+        </div>
+        <button class="icon-btn sidebar-close-btn" id="sidebarCloseBtn" title="Close Sidebar">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="sidebar-actions">
+        <button class="primary-btn new-chat-btn" id="newChatBtn">
+          <i class="fa-solid fa-plus"></i>
+          <span>New Problem Session</span>
+        </button>
+      </div>
+
+      <!-- Problem-Solving Hub Quick Launcher -->
+      <div class="sidebar-section">
+        <div class="section-title">
+          <i class="fa-solid fa-wand-magic-sparkles"></i>
+          <span>Problem-Solving Modes</span>
+        </div>
+        <div class="mode-chips">
+          <button class="mode-chip active" data-mode="general">
+            <i class="fa-solid fa-brain"></i>
+            <span>General Intelligence</span>
+          </button>
+          <button class="mode-chip" data-mode="problem_solver">
+            <i class="fa-solid fa-calculator"></i>
+            <span>Math & Logic Solver</span>
+          </button>
+          <button class="mode-chip" data-mode="code_master">
+            <i class="fa-solid fa-code"></i>
+            <span>Code Architect</span>
+          </button>
+          <button class="mode-chip" data-mode="vision_expert">
+            <i class="fa-solid fa-eye"></i>
+            <span>Vision Diagram QA</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Quick Tools -->
+      <div class="sidebar-section">
+        <div class="section-title">
+          <i class="fa-solid fa-toolbox"></i>
+          <span>Creation & Assistant</span>
+        </div>
+        <div class="tool-links">
+          <button class="tool-btn" id="openImageStudioBtn">
+            <i class="fa-solid fa-palette"></i>
+            <div class="tool-info">
+              <span class="tool-name">AI Image Studio</span>
+              <span class="tool-desc">Prompt-to-Image Creation</span>
+            </div>
+          </button>
+          <button class="tool-btn" id="open3dCompanionBtn">
+            <i class="fa-solid fa-cube"></i>
+            <div class="tool-info">
+              <span class="tool-name">3D Virtual Companion</span>
+              <span class="tool-desc">Interactive Hologram Avatar</span>
+            </div>
+          </button>
+        </div>
+      </div>
+
+      <!-- Chat History -->
+      <div class="sidebar-section history-section">
+        <div class="section-title">
+          <i class="fa-solid fa-clock-rotate-left"></i>
+          <span>Recent Sessions</span>
+          <button class="clear-history-btn" id="clearHistoryBtn" title="Clear all history">
+            <i class="fa-solid fa-trash-can"></i>
+          </button>
+        </div>
+        <div class="history-list" id="historyList">
+          <!-- Dynamic history items -->
+        </div>
+      </div>
+
+      <!-- Sidebar Footer -->
+      <div class="sidebar-footer">
+        <div class="user-info-bar">
+          <div class="status-indicator-dot online" id="serverStatusDot"></div>
+          <div class="server-status-text">
+            <span class="groq-status" id="groqStatusLabel">Groq Engine Ready</span>
+            <span class="model-badge" id="currentModelBadge">Qwen 3.8 27B</span>
+          </div>
+        </div>
+        <div class="footer-actions">
+          <button class="icon-btn" id="openSettingsBtn" title="Settings & Groq API Key">
+            <i class="fa-solid fa-gear"></i>
+          </button>
+          <button class="icon-btn" id="exportChatBtn" title="Export Conversation">
+            <i class="fa-solid fa-download"></i>
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="app-main">
+      
+      <!-- Top Navigation Header -->
+      <header class="top-nav">
+        <div class="nav-left">
+          <button class="icon-btn sidebar-toggle-btn" id="sidebarToggleBtn" title="Toggle Sidebar">
+            <i class="fa-solid fa-bars-staggered"></i>
+          </button>
+          <div class="model-picker-wrap">
+            <i class="fa-solid fa-bolt-lightning model-icon"></i>
+            <select id="modelSelect" class="model-select" title="Choose Groq LLM Model">
+              <option value="qwen/qwen3.8-27b" selected>Qwen 3.8 27B (Fast & High Reasoning)</option>
+              <option value="groq/compound">Groq Compound (Code & Tool Reasoning)</option>
+              <option value="openai/gpt-oss-120b">GPT OSS 120B (Deep Reasoning)</option>
+              <option value="llama-3.3-70b-versatile">Llama 3.3 70B Versatile</option>
+              <option value="llama-3.1-8b-instant">Llama 3.1 8B Instant</option>
+              <option value="llama-3.2-11b-vision-preview">Llama 3.2 11B Vision (Multimodal)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="nav-center">
+          <!-- Real-Time Metrics HUD -->
+          <div class="metrics-hud" id="metricsHud">
+            <div class="hud-item" title="Generation Speed">
+              <i class="fa-solid fa-gauge-high"></i>
+              <span id="hudSpeed">~520 tok/s</span>
+            </div>
+            <div class="hud-divider"></div>
+            <div class="hud-item" title="Latency">
+              <i class="fa-solid fa-stopwatch"></i>
+              <span id="hudLatency">0.34s</span>
+            </div>
+            <div class="hud-divider"></div>
+            <div class="hud-item" id="apiKeyStatusHud" title="Groq API Key status">
+              <i class="fa-solid fa-key"></i>
+              <span id="hudKeyText">Connected</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="nav-right">
+          <!-- Inbuilt Audio Assistant Toggle -->
+          <div class="audio-assistant-toggle-wrap" title="Toggle Inbuilt Voice Assistant">
+            <button class="audio-assistant-btn" id="audioAssistantToggleBtn">
+              <div class="audio-wave-icon" id="headerAudioWave">
+                <span></span><span></span><span></span><span></span>
+              </div>
+              <span class="btn-text">Voice Assistant</span>
+              <span class="status-pill off" id="audioStatusPill">OFF</span>
+            </button>
+          </div>
+
+          <!-- 3D Avatar Companion Launcher -->
+          <button class="nav-action-btn avatar-launch-btn" id="headerAvatarBtn" title="Launch 3D Pop-up Chatbot">
+            <i class="fa-solid fa-cube"></i>
+            <span class="btn-text">3D Avatar</span>
+          </button>
+
+          <!-- Settings Button -->
+          <button class="icon-btn" id="navSettingsBtn" title="Settings & API Key">
+            <i class="fa-solid fa-sliders"></i>
+          </button>
+        </div>
+      </header>
+
+      <!-- Chat Canvas -->
+      <section class="chat-canvas" id="chatCanvas">
+        <div class="chat-scroll-container" id="chatScrollContainer">
+          
+          <!-- Welcome Hero View (when chat is empty) -->
+          <div class="welcome-hero" id="welcomeHero">
+            <div class="hero-badge">
+              <span class="badge-pulse"></span>
+              <span>Ultra-Fast Groq LPU Multimodal Engine</span>
+            </div>
+            <h1 class="hero-title">What problem can we solve today?</h1>
+            <p class="hero-subtitle">
+              Ask anything, debug code, analyze diagrams with vision, create AI art, or talk with the interactive 3D virtual assistant.
+            </p>
+
+            <!-- Problem-Solving Prompt Cards -->
+            <div class="hero-cards-grid">
+              <div class="hero-card" data-prompt="Design an ultra-fast algorithm to solve the maximum subarray problem in O(N) time with Python code and step-by-step mathematical proof.">
+                <div class="card-icon code-color">
+                  <i class="fa-solid fa-terminal"></i>
+                </div>
+                <h3>Code & Algorithm Architect</h3>
+                <p>Optimal algorithms, debugging, architecture, and complexity analysis.</p>
+                <span class="card-action">Solve problem <i class="fa-solid fa-arrow-right"></i></span>
+              </div>
+
+              <div class="hero-card" data-prompt="Solve this math problem step-by-step: Evaluate the integral ∫ (x^2 * e^(2x)) dx using integration by parts with rigorous explanation.">
+                <div class="card-icon math-color">
+                  <i class="fa-solid fa-square-root-variable"></i>
+                </div>
+                <h3>Math & Logic Solver</h3>
+                <p>Step-by-step calculus, linear algebra, proofs, and physics derivations.</p>
+                <span class="card-action">Calculate now <i class="fa-solid fa-arrow-right"></i></span>
+              </div>
+
+              <div class="hero-card" id="heroVisionCard">
+                <div class="card-icon vision-color">
+                  <i class="fa-solid fa-camera"></i>
+                </div>
+                <h3>Visual Vision & Diagrams</h3>
+                <p>Upload screenshots, flowcharts, or equations for multimodal problem solving.</p>
+                <span class="card-action">Upload image <i class="fa-solid fa-arrow-right"></i></span>
+              </div>
+
+              <div class="hero-card" id="heroImageGenCard">
+                <div class="card-icon art-color">
+                  <i class="fa-solid fa-wand-magic"></i>
+                </div>
+                <h3>AI Image Studio</h3>
+                <p>Generate breathtaking 8K photorealistic, cinematic, or cyberpunk artwork.</p>
+                <span class="card-action">Create art <i class="fa-solid fa-arrow-right"></i></span>
+              </div>
+            </div>
+
+            <!-- Features Highlights -->
+            <div class="features-row">
+              <div class="feat-pill"><i class="fa-solid fa-microphone"></i> Voice Whisper Input</div>
+              <div class="feat-pill"><i class="fa-solid fa-volume-high"></i> Inbuilt Audio Assistant</div>
+              <div class="feat-pill"><i class="fa-solid fa-cube"></i> Interactive 3D Pop-up</div>
+              <div class="feat-pill"><i class="fa-solid fa-bolt"></i> ~500+ Tokens/sec</div>
+            </div>
+          </div>
+
+          <!-- Message Thread Container -->
+          <div class="messages-container" id="messagesContainer">
+            <!-- Messages will be dynamically rendered here -->
+          </div>
+
+        </div>
+
+        <!-- Scroll to bottom button -->
+        <button class="scroll-bottom-btn" id="scrollBottomBtn" title="Scroll to latest">
+          <i class="fa-solid fa-chevron-down"></i>
+        </button>
+      </section>
+
+      <!-- Inbuilt Audio Voice Assistant Floating Bar -->
+      <div class="audio-companion-bar" id="audioCompanionBar">
+        <div class="companion-status">
+          <div class="companion-orb" id="companionOrb">
+            <div class="orb-ring"></div>
+            <i class="fa-solid fa-headphones"></i>
+          </div>
+          <div class="companion-text">
+            <span class="title">Voice Assistant Active</span>
+            <span class="subtitle" id="companionSubText">Ready to speak responses</span>
+          </div>
+        </div>
+
+        <!-- Audio Waveform Canvas -->
+        <div class="waveform-container">
+          <canvas id="waveformCanvas" width="200" height="36"></canvas>
+        </div>
+
+        <div class="companion-controls">
+          <button class="icon-btn small" id="stopSpeechBtn" title="Stop Speaking">
+            <i class="fa-solid fa-stop"></i>
+          </button>
+          <button class="icon-btn small" id="closeAudioBarBtn" title="Mute Assistant">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Multimodal Input Dock -->
+      <footer class="input-dock-container">
+        
+        <!-- Image Preview Pill (when an image is selected) -->
+        <div class="attachment-preview-bar" id="attachmentPreviewBar" style="display: none;">
+          <div class="preview-item">
+            <img id="previewImageThumb" src="" alt="Attached preview">
+            <div class="preview-meta">
+              <span class="preview-filename" id="previewFileName">image.png</span>
+              <span class="preview-tag"><i class="fa-solid fa-eye"></i> Vision Mode Auto-Active</span>
+            </div>
+            <button class="remove-attachment-btn" id="removeAttachmentBtn" title="Remove image">
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Live Voice Recording HUD (when recording) -->
+        <div class="recording-indicator-hud" id="recordingIndicatorHud" style="display: none;">
+          <div class="recording-pulse"></div>
+          <span class="recording-label">Listening via Groq Whisper...</span>
+          <div class="recording-timer" id="recordingTimer">00:00</div>
+          <button class="cancel-recording-btn" id="cancelRecordingBtn" title="Cancel">
+            <i class="fa-solid fa-trash"></i>
+          </button>
+          <button class="done-recording-btn" id="doneRecordingBtn" title="Finish & Transcribe">
+            <i class="fa-solid fa-check"></i> Transcribe
+          </button>
+        </div>
+
+        <!-- Main Input Form -->
+        <div class="input-card" id="inputCard">
+          
+          <!-- Auxiliary tool triggers -->
+          <div class="input-tools-left">
+            <!-- Hidden file input for image upload -->
+            <input type="file" id="imageFileInput" accept="image/png, image/jpeg, image/webp, image/gif" style="display: none;">
+            <button type="button" class="tool-icon-btn" id="attachImageBtn" title="Attach Image for Vision Analysis (or paste Ctrl+V)">
+              <i class="fa-solid fa-image"></i>
+            </button>
+            <button type="button" class="tool-icon-btn" id="quickArtBtn" title="Quick AI Image Creation">
+              <i class="fa-solid fa-wand-magic-sparkles"></i>
+            </button>
+          </div>
+
+          <!-- Expanding Textarea -->
+          <div class="textarea-wrap">
+            <textarea
+              id="promptInput"
+              placeholder="Ask anything, describe a problem, upload an image, or speak..."
+              rows="1"
+              maxlength="10000"
+            ></textarea>
+          </div>
+
+          <!-- Right Action Buttons -->
+          <div class="input-tools-right">
+            <!-- Voice Input Button (Groq Whisper) -->
+            <button type="button" class="tool-icon-btn mic-btn" id="micBtn" title="Voice Input with Groq Whisper">
+              <i class="fa-solid fa-microphone"></i>
+            </button>
+
+            <!-- Send / Stop Message Button -->
+            <button type="button" class="send-btn" id="sendBtn" title="Send (Enter)">
+              <i class="fa-solid fa-paper-plane" id="sendIcon"></i>
+              <div class="spinner" id="sendSpinner" style="display: none;"></div>
+            </button>
+            <button type="button" class="stop-gen-btn" id="stopGenBtn" title="Stop Generation" style="display: none;">
+              <i class="fa-solid fa-square"></i>
+            </button>
+          </div>
+        </div>
+
+        <div class="input-footer-note">
+          <span>Nova AI uses Groq LPU inference. Press <kbd>Enter</kbd> to send, <kbd>Shift + Enter</kbd> for new line.</span>
+        </div>
+      </footer>
+
+    </main>
+
+    <!-- 3D VIRTUAL POP-UP CHATBOT COMPANION -->
+    <div class="companion-3d-popup" id="companion3dPopup">
+      <div class="popup-3d-window" id="popup3dWindow">
+        
+        <!-- Window Header -->
+        <div class="popup-3d-header">
+          <div class="popup-title">
+            <div class="status-beacon"></div>
+            <span>Nova 3D Holographic Companion</span>
+          </div>
+          <div class="popup-controls">
+            <button class="popup-btn" id="minimize3dBtn" title="Minimize">
+              <i class="fa-solid fa-minus"></i>
+            </button>
+            <button class="popup-btn" id="close3dBtn" title="Close">
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- 3D Canvas Container -->
+        <div class="popup-3d-canvas-wrap" id="canvas3dContainer">
+          <div class="avatar-state-tag" id="avatarStateTag">State: IDLE</div>
+          <!-- Three.js Canvas injected here -->
+          <div class="hologram-scanline"></div>
+          <div class="hologram-vignette"></div>
+        </div>
+
+        <!-- 3D Companion Interactive Info & Speech Bubble -->
+        <div class="popup-3d-body">
+          <div class="companion-bubble" id="companionBubble">
+            "Hello! I am your 3D AI companion. Click and drag me to rotate, or ask me any question!"
+          </div>
+          <div class="companion-quick-actions">
+            <button class="chip-action" data-ask="Explain how quantum computers work simply.">Quantum Info</button>
+            <button class="chip-action" data-ask="Write a clean Python quicksort algorithm.">Python Quicksort</button>
+            <button class="chip-action" id="companionVoiceToggle">
+              <i class="fa-solid fa-microphone"></i> Talk
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Floating 3D Launcher Bubble -->
+      <button class="floating-3d-launcher" id="floating3dLauncher" title="Toggle 3D Virtual Pop-up Chatbot">
+        <div class="launcher-pulse"></div>
+        <div class="launcher-icon">
+          <i class="fa-solid fa-cube"></i>
+        </div>
+        <span class="launcher-badge">3D AI</span>
+      </button>
+    </div>
+
+  </div>
+
+  <!-- AI IMAGE STUDIO MODAL -->
+  <div class="modal-overlay" id="imageStudioModal">
+    <div class="modal-card image-studio-card">
+      <div class="modal-header">
+        <div class="modal-title">
+          <i class="fa-solid fa-palette"></i>
+          <span>AI Image Creation Studio</span>
+        </div>
+        <button class="icon-btn modal-close-btn" id="closeImageStudioBtn">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <div class="image-studio-grid">
+          
+          <!-- Generator Form -->
+          <div class="studio-form">
+            <div class="form-group">
+              <label for="imagePromptInput">Image Prompt / Description</label>
+              <textarea id="imagePromptInput" rows="3" placeholder="Describe the image you want to create in vivid detail (e.g. A futuristic neon cyber city at night in torrential rain with flying vehicles)..."></textarea>
+            </div>
+
+            <!-- Style Selector -->
+            <div class="form-group">
+              <label>Artistic Style Preset</label>
+              <div class="style-presets-grid" id="stylePresetsGrid">
+                <button type="button" class="style-btn active" data-style="photorealistic">
+                  <i class="fa-solid fa-camera"></i>
+                  <span>Photorealistic</span>
+                </button>
+                <button type="button" class="style-btn" data-style="cyberpunk">
+                  <i class="fa-solid fa-city"></i>
+                  <span>Cyberpunk</span>
+                </button>
+                <button type="button" class="style-btn" data-style="cinematic">
+                  <i class="fa-solid fa-film"></i>
+                  <span>Cinematic 8K</span>
+                </button>
+                <button type="button" class="style-btn" data-style="anime">
+                  <i class="fa-solid fa-dragon"></i>
+                  <span>Anime Visual</span>
+                </button>
+                <button type="button" class="style-btn" data-style="digital_art">
+                  <i class="fa-solid fa-paintbrush"></i>
+                  <span>Digital Art</span>
+                </button>
+                <button type="button" class="style-btn" data-style="3d_render">
+                  <i class="fa-solid fa-cube"></i>
+                  <span>3D Octane</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Aspect Ratio Selector -->
+            <div class="form-group">
+              <label>Aspect Ratio</label>
+              <div class="ratio-selector" id="ratioSelector">
+                <button type="button" class="ratio-btn active" data-ratio="1:1">1:1 Square</button>
+                <button type="button" class="ratio-btn" data-ratio="16:9">16:9 Landscape</button>
+                <button type="button" class="ratio-btn" data-ratio="9:16">9:16 Portrait</button>
+                <button type="button" class="ratio-btn" data-ratio="4:3">4:3 Standard</button>
+              </div>
+            </div>
+
+            <button class="primary-btn generate-art-btn" id="generateArtBtn">
+              <i class="fa-solid fa-wand-magic-sparkles"></i>
+              <span>Generate AI Artwork</span>
+            </button>
+          </div>
+
+          <!-- Studio Preview Section -->
+          <div class="studio-preview-pane">
+            <div class="preview-canvas-box" id="imagePreviewBox">
+              <div class="empty-preview" id="emptyImagePreview">
+                <i class="fa-regular fa-image"></i>
+                <p>Your generated artwork will appear here in high resolution.</p>
+              </div>
+              <div class="generating-spinner" id="imageGeneratingSpinner" style="display: none;">
+                <div class="spinner-ring"></div>
+                <span id="generatingSpinnerText">Generating AI artwork...</span>
+              </div>
+              <div class="studio-error-notice" id="imageStudioError" style="display: none;">
+                <i class="fa-solid fa-circle-exclamation"></i>
+                <span id="imageStudioErrorText">Image generation failed. Please try again.</span>
+              </div>
+              <img id="generatedResultImg" src="" alt="Generated artwork" style="display: none;">
+            </div>
+
+            <div class="studio-subject-meta" id="studioSubjectMeta" style="display: none;">
+              • <strong>Subject:</strong> <span id="studioSubjectText"></span>
+            </div>
+
+            <div class="preview-actions-bar" id="imageActionsBar" style="display: none;">
+              <button type="button" class="action-btn" id="studioViewFullBtn">
+                <i class="fa-solid fa-expand"></i> View Full Image
+              </button>
+              <button type="button" class="action-btn" id="studioDownloadBtn">
+                <i class="fa-solid fa-download"></i> Download Image
+              </button>
+              <button type="button" class="action-btn" id="studioRegenBtn">
+                <i class="fa-solid fa-rotate"></i> Regenerate
+              </button>
+              <button type="button" class="action-btn primary" id="insertArtToChatBtn">
+                <i class="fa-solid fa-comment-medical"></i> Insert to Chat
+              </button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SETTINGS MODAL -->
+  <div class="modal-overlay" id="settingsModal">
+    <div class="modal-card settings-card">
+      <div class="modal-header">
+        <div class="modal-title">
+          <i class="fa-solid fa-sliders"></i>
+          <span>Engine Settings & Groq API Key</span>
+        </div>
+        <button class="icon-btn modal-close-btn" id="closeSettingsBtn">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <div class="settings-form">
+          
+          <!-- API Key Section -->
+          <div class="form-group">
+            <label for="groqApiKeyInput">
+              <span>Groq Cloud API Key</span>
+              <a href="https://console.groq.com/keys" target="_blank" rel="noopener" class="help-link">
+                Get free key <i class="fa-solid fa-arrow-up-right-from-square"></i>
+              </a>
+            </label>
+            <div class="input-with-action">
+              <input type="password" id="groqApiKeyInput" placeholder="gsk_..." autocomplete="off">
+              <button type="button" class="icon-btn" id="toggleApiKeyVisBtn" title="Toggle Visibility">
+                <i class="fa-solid fa-eye"></i>
+              </button>
+            </div>
+            <p class="field-hint">
+              Saved automatically to your <code>.env</code> file. Stored securely on your server.
+            </p>
+          </div>
+
+          <div class="key-status-box" id="keyStatusBox">
+            <div class="status-line">
+              <span class="dot" id="settingStatusDot"></span>
+              <span id="settingStatusText">Checking connection...</span>
+            </div>
+            <button type="button" class="verify-key-btn" id="verifyKeyBtn">
+              Verify & Save Key
+            </button>
+          </div>
+
+          <hr class="divider">
+
+          <!-- Voice Assistant Preferences -->
+          <div class="form-group">
+            <label for="voiceSelect">Inbuilt Audio Voice</label>
+            <select id="voiceSelect" class="form-select">
+              <!-- Populated via Web Speech API -->
+            </select>
+          </div>
+
+          <div class="form-group-row">
+            <div class="form-group">
+              <label for="voiceRateSlider">Speech Speed: <span id="rateVal">1.0x</span></label>
+              <input type="range" id="voiceRateSlider" min="0.7" max="1.5" step="0.1" value="1.0">
+            </div>
+            <div class="form-group">
+              <label for="voicePitchSlider">Speech Pitch: <span id="pitchVal">1.0</span></label>
+              <input type="range" id="voicePitchSlider" min="0.8" max="1.3" step="0.1" value="1.0">
+            </div>
+          </div>
+
+          <div class="form-group checkbox-group">
+            <label class="checkbox-label">
+              <input type="checkbox" id="autoReadCheckbox">
+              <span>Auto-speak responses (Inbuilt Voice Assistant mode)</span>
+            </label>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- LIGHTBOX MODAL FOR FULL IMAGE VIEW -->
+  <div class="modal-overlay" id="lightboxModal">
+    <div class="lightbox-card">
+      <div class="lightbox-header">
+        <span class="lightbox-title" id="lightboxTitle">• Subject: </span>
+        <div class="lightbox-header-actions">
+          <button type="button" class="icon-btn small" id="lightboxDownloadBtn" title="Download Image"><i class="fa-solid fa-download"></i></button>
+          <button type="button" class="icon-btn small" id="closeLightboxBtn" title="Close"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+      </div>
+      <div class="lightbox-body">
+        <img id="lightboxImg" src="" alt="Full preview" />
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="/static/js/avatar3d.js"></script>
+  <script src="/static/js/app.js"></script>
+</body>
+</html>
